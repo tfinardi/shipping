@@ -10,11 +10,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      GROUP: weaveworksdemos
+      GROUP: ${{ secrets.DOCKER_USER }}
       COMMIT: ${{ github.sha }}
       REPO: shipping
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out the repo
+        uses: actions/checkout@v2
 
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
@@ -38,14 +39,18 @@ jobs:
         run: mvn integration-test
 
       # Push to dockerhub
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v1
-        if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master'
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
-          dockerfile: docker/shipping/Dockerfile
-          path: target/
-          repository: ${{ env.GROUP }}/${{ env.REPO }}
-          tag_with_ref: true
-          tag_with_sha: true
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: docker/shipping/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USER }}/${{ env.REPO }}:${{ github.sha }}
+            ${{ secrets.DOCKER_USER }}/${{ env.REPO }}:latest
