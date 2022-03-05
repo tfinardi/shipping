@@ -38,6 +38,10 @@ jobs:
       - name: Integration Tests
         run: mvn integration-test
 
+      - name: get short-sha
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
       # Push to dockerhub
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -52,5 +56,5 @@ jobs:
           file: docker/shipping/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_USER }}/${{ env.REPO }}:${{ github.sha }}
+            ${{ secrets.DOCKER_USER }}/${{ env.REPO }}:${{ steps.vars.outputs.sha_short }}
             ${{ secrets.DOCKER_USER }}/${{ env.REPO }}:latest
