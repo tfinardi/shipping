@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      GROUP: ${{ secrets.DOCKER_USER }}
+      GROUP: weaveworksdemos
       COMMIT: ${{ github.sha }}
       REPO: shipping
     steps:
